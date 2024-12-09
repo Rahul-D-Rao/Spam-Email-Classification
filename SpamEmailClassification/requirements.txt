@@ -1,0 +1,9 @@
+streamlit
+pandas>=2.0.0
+numpy
+scikit-learn
+nltk
+matplotlib
+seaborn
+joblib
+wordcloud

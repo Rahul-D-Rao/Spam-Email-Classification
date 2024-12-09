@@ -1,0 +1,4 @@
+Dear Customer,  
+Your shipment is delayed due to payment confirmation issues. To avoid cancellation, please confirm payment within the next 24 hours of $1000 as your product cost around $100000. 
+Click here to resolve the issue. Thank you for choosing our service.  
+Best regards, Support Team  

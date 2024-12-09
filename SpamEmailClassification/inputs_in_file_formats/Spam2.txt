@@ -1,0 +1,4 @@
+Dear Customer,  
+Your account has been flagged for suspicious activity. To ensure uninterrupted service, we require you to confirm your personal details.  
+Click here to verify your account immediately. Failure to act may result in permanent deactivation of your account.  
+Regards, Security Team  
