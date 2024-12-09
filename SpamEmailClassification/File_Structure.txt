@@ -5,19 +5,19 @@ SpamEmailClassifier/
 ├── main.py
 ├── app/
 │   ├── __init__.py
-│   ├── ui.py                 # Handles Streamlit app user interface
-│   ├── classification.py      # Logic for spam classification
-│   └── utils.py               # Utility functions (e.g., text preprocessing)
+│   ├── ui.py
+│   ├── classification.py
+│   └── utils.py
 ├── data/
-│   ├── spam.csv              # Original dataset
+│   ├── spam.csv
 ├── models/
-│   ├── saved_model.pkl       # Serialized trained model
-│   └── vectorizer.pkl        # Serialized vectorizer (e.g., TfidfVectorizer or CountVectorizer)
+│   ├── saved_model.pkl
+│   └── vectorizer.pkl
 ├── scripts/
-│   ├── preprocess.py         # Preprocessing script for data cleaning
-│   ├── train.py              # Script for training the model
-│   └── evaluate.py           # Script for model evaluation
+│   ├── preprocess.py
+│   ├── train.py
+│   └── evaluate.py
 └── tests/
-    ├── test_preprocessing.py  # Unit tests for preprocessing
-    ├── test_model.py          # Unit tests for model
-    └── test_app.py            # Unit tests for Streamlit app
+    ├── test_preprocessing.py
+    ├── test_model.py
+    └── test_app.py
