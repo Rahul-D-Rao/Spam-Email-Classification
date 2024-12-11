@@ -16,3 +16,8 @@ This project aims to classify emails as either **Spam** or **Ham** using advance
   - Built with Streamlit for real-time email classification.
 - **Performance Metrics**:
   - Achieves over 97% accuracy with optimized models.
+
+## To Run the main streamlit application we use the below command:
+```bash
+streamlit run main.py
+```
