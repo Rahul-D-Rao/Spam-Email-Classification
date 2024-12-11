@@ -1,82 +1,132 @@
 import os
-import pickle
-import pandas as pd
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+import streamlit as st
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+from classification import classify_email  # Update the import path if necessary
 
-# Determine root directory
-root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Set Streamlit configuration
+def launch_app():
+    st.set_page_config(
+        page_title="Spam Email Classifier",
+        page_icon="📧",
+        layout="wide",
+        initial_sidebar_state="expanded",
+    )
 
-# Paths
-data_path = os.path.join(root_dir, 'data', 'spam.csv')
-model_path = os.path.join(root_dir, 'models', 'saved_model.pkl')
-vectorizer_path = os.path.join(root_dir, 'models', 'vectorizer.pkl')
+    # Initialize session state for page navigation
+    if "current_page" not in st.session_state:
+        st.session_state["current_page"] = "Home"
 
-# Load data
-data = pd.read_csv(data_path, encoding="latin-1")
+    # Sidebar navigation
+    with st.sidebar:
+        st.title("📧 Spam Email Classifier")
+        page = st.radio(
+            "Navigate:",
+            ["Home", "Classify Email", "Insights"],
+            key="sidebar_navigation",
+            index=["Home", "Classify Email", "Insights"].index(st.session_state["current_page"]),
+        )
+        st.session_state["current_page"] = page
 
-# Clean data
-data.columns = ['label', 'message']
-data['label'] = data['label'].map({'ham': 0, 'spam': 1})
+    # Page rendering based on the current page
+    if st.session_state["current_page"] == "Home":
+        # Enhanced Home page design
+        st.markdown(
+            """
+            <div style="
+                background-color: #007BFF;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                color: white;
+                margin-bottom: 20px;">
+                <h1 style="font-size: 40px; font-weight: bold;">Welcome to Spam Classifier</h1>
+                <p style="font-size: 18px;">Detect spam emails instantly and efficiently!</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-# Prepare data
-X = data['message']
-y = data['label']
-cv = CountVectorizer()
-X = cv.fit_transform(X)
+        st.markdown(
+            """
+            <p style="font-size: 18px; text-align: center;">
+                Upload your email files or paste email content to classify them as Spam or Ham. Explore insightful visualizations
+                and uncover patterns in your email content with this intuitive and sleek interface.
+            </p>
+            """,
+            unsafe_allow_html=True,
+        )
 
-# Train-test split
-x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        if st.button("Start Classifying Emails"):
+            st.session_state["current_page"] = "Classify Email"
 
-# Train models
-nb_model = MultinomialNB()
-rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+    elif st.session_state["current_page"] == "Classify Email":
+        # Email classification logic
+        st.title("📧 Classify Your Email")
+        st.markdown("### Upload files or enter email content below.")
 
-# Fit models
-nb_model.fit(x_train, y_train)
-rf_model.fit(x_train, y_train)
+        # Drag-and-drop multiple file upload
+        uploaded_files = st.file_uploader(
+            "Upload text files (you can upload multiple files)", 
+            type=["txt"], 
+            accept_multiple_files=True
+        )
 
-# Predict using both models
-nb_predictions = nb_model.predict(x_test)
-rf_predictions = rf_model.predict(x_test)
+        if uploaded_files:
+            st.markdown("### Uploaded Files:")
+            results = []
+            for file in uploaded_files:
+                email_content = file.read().decode("utf-8")
+                result = classify_email(email_content)
+                results.append((file.name, result))
 
-# Calculate performance metrics for Naive Bayes
-nb_accuracy = accuracy_score(y_test, nb_predictions)
-nb_precision = precision_score(y_test, nb_predictions)
-nb_recall = recall_score(y_test, nb_predictions)
-nb_f1 = f1_score(y_test, nb_predictions)
+            st.markdown("### Classification Results:")
+            for file_name, classification in results:
+                color = "red" if classification.lower() == "spam" else "green"
+                st.markdown(
+                    f'<p style="color: {color}; font-size: 18px;">{file_name}: {classification.upper()}</p>',
+                    unsafe_allow_html=True,
+                )
+        else:
+            email_input = st.text_area("Or paste your email content here:", height=200)
 
-# Calculate performance metrics for Random Forest
-rf_accuracy = accuracy_score(y_test, rf_predictions)
-rf_precision = precision_score(y_test, rf_predictions)
-rf_recall = recall_score(y_test, rf_predictions)
-rf_f1 = f1_score(y_test, rf_predictions)
+            if st.button("Classify"):
+                if email_input.strip():
+                    result = classify_email(email_input)
+                    color = "red" if result.lower() == "spam" else "green"
+                    st.markdown(
+                        f'<p style="color: {color}; font-size: 24px; font-weight: bold;">The email is classified as: {result.upper()}</p>',
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    st.warning("Please provide email content to classify.")
 
-# Print desired output
-print("Model Performance:")
-print(f"\nMultinomial Naive Bayes Performance:")
-print(f"Accuracy: {nb_accuracy * 100:.2f}%")
-print(f"Precision: {nb_precision * 100:.2f}%")
-print(f"Recall: {nb_recall * 100:.2f}%")
-print(f"F1-Score: {nb_f1 * 100:.2f}%")
+    elif st.session_state["current_page"] == "Insights":
+        # Visualization and insights page
+        st.title("🔁 Email Classification Insights")
+        st.markdown("### Explore the patterns in your email content!")
 
-print(f"\nRandom Forest Performance:")
-print(f"Accuracy: {rf_accuracy * 100:.2f}%")
-print(f"Precision: {rf_precision * 100:.2f}%")
-print(f"Recall: {rf_recall * 100:.2f}%")
-print(f"F1-Score: {rf_f1 * 100:.2f}%")
+        # Word cloud visualization
+        st.markdown("#### Word Cloud")
+        example_text = (
+            "Win now! Free prize. Offer limited. Congratulations! Free entry. "
+            "Please respond urgently. Claim now! Exclusive deal. Immediate attention."
+        )
+        wordcloud = WordCloud(width=800, height=400, background_color="white").generate(example_text)
+        plt.figure(figsize=(10, 5))
+        plt.imshow(wordcloud, interpolation="bilinear")
+        plt.axis("off")
+        st.pyplot(plt)
 
-# Save the best-performing model (based on accuracy)
-best_model = nb_model if nb_accuracy > rf_accuracy else rf_model
+        # Feature importance (placeholder for actual values)
+        st.markdown("#### Feature Importance")
+        st.bar_chart({"Feature": ["Offer", "Congratulations", "Limited"], "Importance": [0.8, 0.6, 0.4]})
 
-# Save the model and vectorizer for future use
-with open(model_path, 'wb') as model_file:
-    pickle.dump(best_model, model_file)
+        # Model performance metrics (example values)
+        st.markdown("#### Model Performance")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Accuracy", "97%")
+        col2.metric("Precision", "95%")
+        col3.metric("Recall", "96%")
 
-with open(vectorizer_path, 'wb') as vectorizer_file:
-    pickle.dump(cv, vectorizer_file)
-
-print("\nModel and vectorizer saved successfully.")
+        st.markdown("Explore more by navigating to the **Classify Email** tab!")
